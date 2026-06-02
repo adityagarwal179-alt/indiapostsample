@@ -3,381 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>India Post - Cloud Connected Admin Dashboard</title>
+    <title>Global Logistics Admin & Tracking Panel</title>
     <style>
-        :root {
-            --primary-blue: #0056b3;
-            --success-green: #28a745;
-            --danger-red: #dc3545;
-            --warning-yellow: #ffc107;
-            --light-bg: #f8f9fa;
-            --border-color: #dee2e6;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
             margin: 0;
             padding: 20px;
             color: #333;
         }
-
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
-            background: #fff;
-            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: #1e3a8a;
+            color: white;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
-
-        .dashboard-header {
-            border-bottom: 2px solid var(--primary-blue);
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .dashboard-header h2 {
-            margin: 0;
-            color: var(--primary-blue);
-            font-size: 24px;
-        }
-
-        .grid-two-col {
+        .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
+            gap: 20px;
         }
-
         @media (max-width: 768px) {
-            .grid-two-col { grid-template-columns: 1fr; }
+            .grid { grid-template-columns: 1fr; }
         }
-
-        .section-title {
-            font-size: 18px;
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+        }
+        .card-tracking {
+            background: #fffbeb;
+            border: 2px solid #d97706;
+            grid-column: 1 / -1;
+        }
+        h2 {
+            margin-top: 0;
+            color: #1e3a8a;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .card-tracking h2 { color: #b45309; border-bottom-color: #fef3c7; }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .inline-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
             font-weight: bold;
-            margin-bottom: 20px;
-            color: #222;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
         }
-
-        .form-group { margin-bottom: 15px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #555; }
-        input, select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; box-sizing: border-box; background-color: #fff; }
-        input:focus, select:focus { outline: none; border-color: var(--primary-blue); }
-        input[readonly] { background-color: #eef2f7; font-weight: bold; color: var(--primary-blue); }
-
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; }
-        .btn:hover { opacity: 0.9; }
-        .btn-blue { background-color: var(--primary-blue); }
-        .btn-green { background-color: var(--success-green); }
-        .btn-danger { background-color: var(--danger-red); padding: 5px 10px; font-size: 12px; margin: 0; width: auto;}
-
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; }
-        th { background-color: #f1f3f5; font-weight: 600; }
-
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; }
-        .badge-transit { background-color: var(--warning-yellow); color: #000; }
-        .badge-booked { background-color: #e2e3e5; color: #383d41; }
-        .badge-delivered { background-color: var(--success-green); color: #fff; }
-
-        .public-tracker { background: #fff9e6; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px; margin-bottom: 40px; }
-        .sync-status { font-size: 12px; color: #666; font-style: italic; margin-top: -15px; margin-bottom: 20px; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-warning { background: #d97706; color: white; }
+        .btn-warning:hover { background: #b45309; }
+        
+        /* Modal Alert Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .modal-content h3 { margin-top: 0; }
+        .modal-btn {
+            margin-top: 15px;
+            background: #1e3a8a;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-
-    <div class="public-tracker">
-        <h3 style="margin-top:0; color: #856404;">🔍 Public Tracking Interface (Cloud Connected)</h3>
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="publicSearchInput" placeholder="Enter Tracking ID (Works on any device!)">
-            <button onclick="trackConsignmentPublic()" class="btn btn-blue" style="width: auto; margin:0; white-space: nowrap;">Track Package</button>
-        </div>
-        <div id="trackingResultDisplay" style="margin-top: 15px; display: none; padding: 10px; background: #fff; border-radius: 4px; border: 1px solid #ddd;"></div>
+    <div class="header">
+        <h1>Global Logistics Network Portal</h1>
+        <p>Live Database Synchronization System</p>
     </div>
 
-    <div class="dashboard-header">
-        <span>⚙️</span>
-        <h2>Central Admin Dashboard (Global Cloud Sync)</h2>
-    </div>
-    <div id="syncStatus" class="sync-status">🔄 Loading shared database from cloud...</div>
-
-    <div class="grid-two-col">
-        
-        <div>
-            <div class="section-title">1. Create / Generate Tracking ID</div>
-            
+    <div class="grid">
+        <div class="card card-tracking">
+            <h2>🔍 Public Tracking Interface (Cloud Connected)</h2>
             <div class="form-group">
-                <label>Order Type</label>
+                <label for="searchTrackId">Enter Tracking ID to Track Live Status</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="searchTrackId" placeholder="e.g., EM619883938IN" style="flex: 2; font-weight: bold; text-transform: uppercase;">
+                    <button class="btn-warning" id="btnTrack" style="flex: 1;">Track Package</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📦 1. Create / Generate Tracking ID</h2>
+            <div class="form-group">
+                <label for="orderType">Order Type</label>
                 <select id="orderType">
                     <option value="Consignment">Consignment</option>
-                    <option value="Speed Post">Speed Post</option>
-                    <option value="Registered Post">Registered Post</option>
+                    <option value="Express Cargo">Express Cargo</option>
+                    <option value="Document Courier">Document Courier</option>
                 </select>
             </div>
-
             <div class="form-group">
-                <label>Tracking ID (Auto Generated or Custom)</label>
-                <input type="text" id="genTrackingId" readonly>
+                <label for="trackId">Tracking ID (Auto Generated or Custom)</label>
+                <input type="text" id="trackId" readonly style="background: #eef2f6; font-weight: bold; color: #1e3a8a;">
             </div>
-
-            <div class="form-row">
+            <div class="inline-group">
                 <div class="form-group">
-                    <label>Origin Office</label>
+                    <label for="originOffice">Origin Office</label>
                     <input type="text" id="originOffice" value="Delhi GPO">
                 </div>
                 <div class="form-group">
-                    <label>Origin PIN</label>
+                    <label for="originPin">Origin PIN</label>
                     <input type="text" id="originPin" value="110001">
                 </div>
             </div>
-
-            <div class="form-row">
+            <div class="inline-group">
                 <div class="form-group">
-                    <label>Destination Office</label>
-                    <input type="text" id="destOffice" placeholder="e.g. Puranur PO">
+                    <label for="destOffice">Destination Office</label>
+                    <input type="text" id="destOffice" placeholder="e.g., Mumbai Hub">
                 </div>
                 <div class="form-group">
-                    <label>Destination PIN</label>
-                    <input type="text" id="destPin" placeholder="e.g. 400001">
+                    <label for="destPin">Destination PIN</label>
+                    <input type="text" id="destPin" placeholder="e.g., 400001">
                 </div>
             </div>
-
-            <button class="btn btn-blue" onclick="saveAndGenerateOrder()">Save & Upload to Cloud</button>
+            <button class="btn-primary" id="btnSaveUpload">Save & Upload to Cloud</button>
         </div>
 
-        <div>
-            <div class="section-title">2. Update Live Status & Routing Location</div>
-            
+        <div class="card">
+            <h2>⚡ 2. Update Live Status & Routing Location</h2>
             <div class="form-group">
-                <label>Select Active ID</label>
-                <select id="activeIdSelector" onchange="loadTargetOrderMetadata()">
-                    <option value="">-- Select Active ID --</option>
+                <label for="activeTrackId">Select Active ID (Generated Above)</label>
+                <input type="text" id="activeTrackId" readonly style="background: #eef2f6; font-weight: bold;">
+            </div>
+            <div class="form-group">
+                <label for="currentStatus">Change Current Status Stage</label>
+                <select id="currentStatus">
+                    <option value="Shipment Booked">Shipment Booked</option>
+                    <option value="Arrived at Origin Facility">Arrived at Origin Facility</option>
+                    <option value="In Transit to Destination">In Transit to Destination</option>
+                    <option value="Arrived at Delivery Hub">Arrived at Delivery Hub</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Successfully Delivered">Successfully Delivered</option>
                 </select>
             </div>
-
             <div class="form-group">
-                <label>Change Current Status Stage</label>
-                <select id="updateStage">
-                    <option value="Item Booked">Stage 1: Item Booked</option>
-                    <option value="In Transit">Stage 2: In Transit</option>
-                    <option value="Out for Delivery">Stage 3: Out for Delivery</option>
-                    <option value="Delivered">Stage 4: Delivered</option>
-                </select>
+                <label for="currentLocation">Current Routing Location (City/Hub)</label>
+                <input type="text" id="currentLocation" placeholder="e.g., Jaipur Transit Center">
             </div>
-
-            <div class="form-group">
-                <label>Current Action Location Office</label>
-                <input type="text" id="updateLocation" placeholder="e.g. Surat Sorting Hub">
-            </div>
-
-            <div class="form-group">
-                <label>Custom Remarks / Status Message</label>
-                <input type="text" id="updateRemarks" placeholder="e.g. Received at Hub">
-            </div>
-
-            <button class="btn btn-green" onclick="pushStatusUpdate()">Push Global Update</button>
+            <button class="btn-success" id="btnPushUpdate">Push Global Update</button>
         </div>
-
     </div>
+</div>
 
-    <div class="database-section">
-        <div class="section-title">Active Orders Database (Live Cloud Data)</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Tracking ID</th>
-                    <th>From -> To</th>
-                    <th>Current Stage</th>
-                    <th>Last Update Location</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="databaseTableBody"></tbody>
-        </table>
+<div class="modal" id="customAlert">
+    <div class="modal-content">
+        <h3 id="alertTitle">Notification</h3>
+        <p id="alertMessage">Message text goes here.</p>
+        <button class="modal-btn" onclick="closeModal()">OK</button>
     </div>
-
 </div>
 
 <script>
-    // Your updated unique cloud database bucket URL
-    const CLOUD_API_URL = 'https://kvdb.io/9vBh7SXWv8hsoqKmP3WzEF/india_post_db';
+    // आपकी सटीक KVDB क्लाउड डेटाबेस यूआरएल बकेट आईडी के साथ
+    const CLOUD_API_URL = "https://kvdb.io/9vBh7SXWV8hsoqKmP3WzEF";
 
-    let ordersDatabase = [];
-
+    // वेब ऐप लोड होते ही एक रैंडम और वैलिड ट्रैकिंग आईडी ऑटो-जनरेट करें
     window.onload = function() {
-        generateRandomTrackingID();
-        fetchDatabaseFromCloud();
+        generateNewTrackingID();
     };
 
-    // Download data from your kvdb bucket
-    async function fetchDatabaseFromCloud() {
-        try {
-            const response = await fetch(CLOUD_API_URL);
-            if (response.ok) {
-                ordersDatabase = await response.json();
-                document.getElementById('syncStatus').innerText = "🟢 Database securely synced with cloud.";
-            } else {
-                ordersDatabase = []; 
-                document.getElementById('syncStatus').innerText = "🟡 Cloud empty. Creating a new data stream.";
-            }
-        } catch (error) {
-            console.error("Cloud Fetch Error:", error);
-            document.getElementById('syncStatus').innerText = "🔴 Cloud offline. Running in offline fallback mode.";
-        }
-        renderDatabaseView();
+    function generateNewTrackingID() {
+        const randomDigits = Math.floor(100000000 + Math.random() * 900000000); // 9 अंकों का रैंडम नंबर
+        const generatedID = `EM${randomDigits}IN`;
+        document.getElementById('trackId').value = generatedID;
+        document.getElementById('activeTrackId').value = generatedID;
     }
 
-    // Save data back up to your kvdb bucket
-    async function saveDatabaseToCloud() {
-        document.getElementById('syncStatus').innerText = "⏳ Syncing changes to global cloud server...";
-        try {
-            await fetch(CLOUD_API_URL, {
-                method: 'POST',
-                body: JSON.stringify(ordersDatabase),
-                headers: { 'Content-Type': 'application/json' }
-            });
-            document.getElementById('syncStatus').innerText = "🟢 Global Cloud Sync Completed Successfully!";
-        } catch (error) {
-            alert("Database failed to upload to cloud. Check your connection!");
-        }
-        renderDatabaseView();
+    // कस्टम अलर्ट पॉपअप फ़ंक्शन
+    function showAlert(title, message) {
+        document.getElementById('alertTitle').innerText = title;
+        document.getElementById('alertMessage').innerText = message;
+        document.getElementById('customAlert').style.display = 'flex';
     }
 
-    function generateRandomTrackingID() {
-        const prefix = "EM";
-        const suffix = "IN";
-        const randomDigits = Math.floor(100000000 + Math.random() * 900000000);
-        document.getElementById('genTrackingId').value = prefix + randomDigits + suffix;
+    function closeModal() {
+        document.getElementById('customAlert').style.display = 'none';
     }
 
-    function renderDatabaseView() {
-        const tbody = document.getElementById('databaseTableBody');
-        const selector = document.getElementById('activeIdSelector');
-        const currentSelectedValue = selector.value;
+    // एक्शन 1: डेटाबेस में नया शिपमेंट बनाना और उसे अपलोड करना
+    document.getElementById('btnSaveUpload').addEventListener('click', async function() {
+        const trackId = document.getElementById('trackId').value.trim();
+        const orderType = document.getElementById('orderType').value;
+        const originOffice = document.getElementById('originOffice').value.trim();
+        const originPin = document.getElementById('originPin').value.trim();
+        const destOffice = document.getElementById('destOffice').value.trim();
+        const destPin = document.getElementById('destPin').value.trim();
 
-        tbody.innerHTML = "";
-        selector.innerHTML = '<option value="">-- Select Active ID --</option>';
-
-        ordersDatabase.forEach((order, index) => {
-            let badgeClass = "badge-booked";
-            if(order.stage === "In Transit" || order.stage === "Out for Delivery") badgeClass = "badge-transit";
-            if(order.stage === "Delivered") badgeClass = "badge-delivered";
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${order.type}</td>
-                    <td><strong>${order.id}</strong></td>
-                    <td>${order.from} ➔ ${order.to}</td>
-                    <td><span class="badge ${badgeClass}">${order.stage}</span></td>
-                    <td>${order.location}</td>
-                    <td><button class="btn btn-danger" onclick="deleteOrderRecord(${index})">Delete</button></td>
-                </tr>
-            `;
-            selector.innerHTML += `<option value="${order.id}">${order.id}</option>`;
-        });
-        selector.value = currentSelectedValue;
-    }
-
-    async function saveAndGenerateOrder() {
-        const id = document.getElementById('genTrackingId').value;
-        const type = document.getElementById('orderType').value;
-        const origin = document.getElementById('originOffice').value || "Delhi GPO";
-        const dest = document.getElementById('destOffice').value.trim();
-
-        if(!dest) {
-            alert("Please type a destination office!");
+        if(!destOffice || !destPin) {
+            showAlert("⚠️ Missing Information", "Please enter Destination Office and Destination PIN before saving.");
             return;
         }
 
-        const newRecord = {
-            type: type,
-            id: id,
-            from: origin,
-            to: dest,
-            stage: "Item Booked",
-            location: origin,
-            remarks: "Item Booked and processing on network."
+        const payload = {
+            trackId: trackId,
+            orderType: orderType,
+            originOffice: originOffice,
+            originPin: originPin,
+            destOffice: destOffice,
+            destPin: destPin,
+            currentStatus: "Shipment Booked",
+            currentLocation: originOffice,
+            lastUpdated: new Date().toLocaleString()
         };
 
-        ordersDatabase.push(newRecord);
-        await saveDatabaseToCloud(); 
-        
-        document.getElementById('destOffice').value = "";
-        document.getElementById('destPin').value = "";
-        generateRandomTrackingID();
-    }
+        try {
+            // KVDB में डेटा को टेक्स्ट स्ट्रिंग के रूप में सेव करने के लिए JSON.stringify का उपयोग करते हैं
+            const response = await fetch(`${CLOUD_API_URL}/${trackId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-    function loadTargetOrderMetadata() {
-        const selectedId = document.getElementById('activeIdSelector').value;
-        const match = ordersDatabase.find(o => o.id === selectedId);
-        if(match) {
-            document.getElementById('updateStage').value = match.stage;
-            document.getElementById('updateLocation').value = match.location;
-            document.getElementById('updateRemarks').value = match.remarks || "";
+            if(response.ok) {
+                showAlert("✅ Cloud Sync Success", `Tracking ID: ${trackId} has been registered to the global network database! Now you can update its status in Section 2.`);
+                document.getElementById('activeTrackId').value = trackId;
+            } else {
+                throw new Error("Server rejected request");
+            }
+        } catch (error) {
+            showAlert("❌ Connection Error", "Failed to connect to the cloud database. Please check your internet connection.");
+            console.error(error);
         }
-    }
+    });
 
-    async function pushStatusUpdate() {
-        const targetId = document.getElementById('activeIdSelector').value;
-        if(!targetId) {
-            alert("Please select an active Tracking ID from dropdown!");
+    // एक्शन 2: बने हुए शिपमेंट का लाइव स्टेटस और लोकेशन अपडेट करना
+    document.getElementById('btnPushUpdate').addEventListener('click', async function() {
+        const trackId = document.getElementById('activeTrackId').value.trim();
+        const currentStatus = document.getElementById('currentStatus').value;
+        const currentLocation = document.getElementById('currentLocation').value.trim();
+
+        if(!currentLocation) {
+            showAlert("⚠️ Missing Location", "Please enter the current routing location center name.");
             return;
         }
 
-        const targetRecord = ordersDatabase.find(o => o.id === targetId);
-        if(targetRecord) {
-            targetRecord.stage = document.getElementById('updateStage').value;
-            targetRecord.location = document.getElementById('updateLocation').value || "Processing Facility";
-            targetRecord.remarks = document.getElementById('updateRemarks').value;
+        try {
+            // पहले पुराना डेटा लाएँ ताकि ओरिजिन/डेस्टिनेशन डिलीट न हो जाए
+            const getRes = await fetch(`${CLOUD_API_URL}/${trackId}`);
+            if(!getRes.ok) {
+                showAlert("❌ Error", "Tracking ID not found on database server. Save it in Section 1 first.");
+                return;
+            }
             
-            await saveDatabaseToCloud(); 
-            alert(`Status updated globally for ${targetId}!`);
+            let data = await getRes.json();
+            
+            // केवल स्टेटस और करंट लोकेशन को अपडेट करें
+            data.currentStatus = currentStatus;
+            data.currentLocation = currentLocation;
+            data.lastUpdated = new Date().toLocaleString();
+
+            // वापस क्लाउड पर सेव करें
+            const postRes = await fetch(`${CLOUD_API_URL}/${trackId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if(postRes.ok) {
+                showAlert("⚡ Global Update Pushed", `Status for ${trackId} has been successfully changed to "${currentStatus}" at "${currentLocation}".`);
+            } else {
+                showAlert("❌ Update Failed", "Could not overwrite status on the network server.");
+            }
+        } catch (error) {
+            showAlert("❌ Process Error", "An error occurred while communicating live status update.");
+            console.error(error);
         }
-    }
+    });
 
-    async function deleteOrderRecord(index) {
-        if(confirm("Delete this tracking ID completely from global cloud database?")) {
-            ordersDatabase.splice(index, 1);
-            await saveDatabaseToCloud();
-        }
-    }
+    // एक्शन 3: पब्लिक ट्रैकिंग इंटरफ़ेस - किसी भी डिवाइस पर सर्च करना
+    document.getElementById('btnTrack').addEventListener('click', async function() {
+        const searchId = document.getElementById('searchTrackId').value.trim().toUpperCase();
 
-    async function trackConsignmentPublic() {
-        await fetchDatabaseFromCloud();
-
-        const inputId = document.getElementById('publicSearchInput').value.trim();
-        const outputView = document.getElementById('trackingResultDisplay');
-
-        if(!inputId) {
-            alert("Please enter a Tracking ID.");
+        if(!searchId) {
+            showAlert("⚠️ Input Empty", "Please type a Tracking ID to check.");
             return;
         }
 
-        const match = ordersDatabase.find(o => o.id === inputId);
+        try {
+            const response = await fetch(`${CLOUD_API_URL}/${searchId}`);
+            
+            if(response.status === 404) {
+                showAlert("❌ Tracking ID Not Found", "Tracking ID not found in global database! Double check your input value.");
+                return;
+            }
 
-        if(match) {
-            outputView.style.display = "block";
-            outputView.innerHTML = `
-                <p style="color: var(--success-green); margin-top:0;"><strong>✔ Tracking Data Loaded from Cloud Database</strong></p>
-                <strong>Route:</strong> ${match.from} ➔ ${match.to}<br>
-                <strong>Current Status:</strong> ${match.stage}<br>
-                <strong>Last Location Facility:</strong> ${match.location}<br>
-                <strong>Remarks:</strong> <em>${match.remarks || "No explicit logs written."}</em>
+            const data = await response.json();
+            
+            // लाइव ट्रैकिंग रिजल्ट को सुंदर तरीके से अलर्ट में दिखाएँ
+            const resultHtml = `
+              📌 Order Type: ${data.orderType}\n
+              📍 Route: ${data.originOffice} (${data.originPin}) ➡️ ${data.destOffice} (${data.destPin})\n
+              ⚡ LIVE STATUS: ${data.currentStatus}\n
+              🏢 Current Hub Location: ${data.currentLocation}\n
+              🕒 Last Update Timestamp: ${data.lastUpdated}
             `;
-        } else {
-            outputView.style.display = "none";
-            alert("Tracking ID not found in global database! Double check your input value.");
+            
+            showAlert("📦 Live Tracking Results Found", resultHtml);
+
+        } catch (error) {
+            showAlert("❌ Search Failure", "Tracking ID not found in global database! Double check your input value.");
+            console.error(error);
         }
-    }
+    });
 </script>
 
 </body>
