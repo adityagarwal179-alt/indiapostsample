@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>India Post - Consignment Tracking & Admin Dashboard</title>
+    <title>India Post - Cloud Connected Admin Dashboard</title>
     <style>
         :root {
             --primary-blue: #0056b3;
@@ -31,7 +31,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
-        /* Top Heading Section */
         .dashboard-header {
             border-bottom: 2px solid var(--primary-blue);
             padding-bottom: 10px;
@@ -47,7 +46,6 @@
             font-size: 24px;
         }
 
-        /* Main Grid Splitter */
         .grid-two-col {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -66,108 +64,30 @@
             color: #222;
         }
 
-        /* Form Controls */
-        .form-group {
-            margin-bottom: 15px;
-        }
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #555; }
+        input, select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; box-sizing: border-box; background-color: #fff; }
+        input:focus, select:focus { outline: none; border-color: var(--primary-blue); }
+        input[readonly] { background-color: #eef2f7; font-weight: bold; color: var(--primary-blue); }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #555;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            box-sizing: border-box;
-            background-color: #fff;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-        }
-
-        input[readonly] {
-            background-color: #eef2f7;
-            font-weight: bold;
-            color: var(--primary-blue);
-        }
-
-        /* Buttons */
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            font-size: 15px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            margin-top: 10px;
-        }
-
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 4px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; }
         .btn:hover { opacity: 0.9; }
         .btn-blue { background-color: var(--primary-blue); }
         .btn-green { background-color: var(--success-green); }
-        .btn-danger { background-color: var(--danger-red); padding: 5px 10px; font-size: 12px; margin: 0;}
+        .btn-danger { background-color: var(--danger-red); padding: 5px 10px; font-size: 12px; margin: 0; width: auto;}
 
-        /* Data Tables */
-        .database-section {
-            margin-top: 30px;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; }
+        th { background-color: #f1f3f5; font-weight: 600; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f1f3f5;
-            font-weight: 600;
-        }
-
-        /* Status Badge Indicators */
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-block;
-        }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; }
         .badge-transit { background-color: var(--warning-yellow); color: #000; }
         .badge-booked { background-color: #e2e3e5; color: #383d41; }
         .badge-delivered { background-color: var(--success-green); color: #fff; }
 
-        /* Public Search Component up top */
-        .public-tracker {
-            background: #fff9e6;
-            padding: 20px;
-            border: 1px solid #ffeeba;
-            border-radius: 6px;
-            margin-bottom: 40px;
-        }
+        .public-tracker { background: #fff9e6; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px; margin-bottom: 40px; }
+        .sync-status { font-size: 12px; color: #666; font-style: italic; margin-top: -15px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -175,19 +95,19 @@
 <div class="container">
 
     <div class="public-tracker">
-        <h3 style="margin-top:0; color: #856404;">🔍 Public Tracking Interface</h3>
+        <h3 style="margin-top:0; color: #856404;">🔍 Public Tracking Interface (Cloud Connected)</h3>
         <div style="display: flex; gap: 10px;">
-            <input type="text" id="publicSearchInput" placeholder="Enter Tracking ID to search system database...">
+            <input type="text" id="publicSearchInput" placeholder="Enter Tracking ID (Works on any device!)">
             <button onclick="trackConsignmentPublic()" class="btn btn-blue" style="width: auto; margin:0; white-space: nowrap;">Track Package</button>
         </div>
-        <div id="trackingResultDisplay" style="margin-top: 15px; display: none; padding: 10px; background: #fff; border-radius: 4px; border: 1px solid #ddd;">
-            </div>
+        <div id="trackingResultDisplay" style="margin-top: 15px; display: none; padding: 10px; background: #fff; border-radius: 4px; border: 1px solid #ddd;"></div>
     </div>
 
     <div class="dashboard-header">
         <span>⚙️</span>
-        <h2>Central Admin Dashboard (Manage Orders)</h2>
+        <h2>Central Admin Dashboard (Global Cloud Sync)</h2>
     </div>
+    <div id="syncStatus" class="sync-status">🔄 Loading shared database from cloud...</div>
 
     <div class="grid-two-col">
         
@@ -230,7 +150,7 @@
                 </div>
             </div>
 
-            <button class="btn btn-blue" onclick="saveAndGenerateOrder()">Save & Generate Order</button>
+            <button class="btn btn-blue" onclick="saveAndGenerateOrder()">Save & Upload to Cloud</button>
         </div>
 
         <div>
@@ -260,16 +180,16 @@
 
             <div class="form-group">
                 <label>Custom Remarks / Status Message</label>
-                <input type="text" id="updateRemarks" placeholder="e.g. Received at Hub / Out for delivery by Postman">
+                <input type="text" id="updateRemarks" placeholder="e.g. Received at Hub">
             </div>
 
-            <button class="btn btn-green" onclick="pushStatusUpdate()">Push Status Update</button>
+            <button class="btn btn-green" onclick="pushStatusUpdate()">Push Global Update</button>
         </div>
 
     </div>
 
     <div class="database-section">
-        <div class="section-title">Active Orders Database In System</div>
+        <div class="section-title">Active Orders Database (Live Cloud Data)</div>
         <table>
             <thead>
                 <tr>
@@ -281,34 +201,57 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="databaseTableBody">
-                </tbody>
+            <tbody id="databaseTableBody"></tbody>
         </table>
     </div>
 
 </div>
 
 <script>
-    // System Volatile Runtime Database Array Structure
-    let ordersDatabase = [
-        {
-            type: "Consignment",
-            id: "EM442402770IN",
-            from: "Delhi GPO",
-            to: "Puranur PO",
-            stage: "In Transit",
-            location: "Puranur PO",
-            remarks: "Item arrived at delivery hub"
-        }
-    ];
+    // Your updated unique cloud database bucket URL
+    const CLOUD_API_URL = 'https://kvdb.io/9vBh7SXWv8hsoqKmP3WzEF/india_post_db';
 
-    // Initialize application runtime properties
+    let ordersDatabase = [];
+
     window.onload = function() {
         generateRandomTrackingID();
-        renderDatabaseView();
+        fetchDatabaseFromCloud();
     };
 
-    // Auto-generates standard dynamic identifiers matching India Post formats
+    // Download data from your kvdb bucket
+    async function fetchDatabaseFromCloud() {
+        try {
+            const response = await fetch(CLOUD_API_URL);
+            if (response.ok) {
+                ordersDatabase = await response.json();
+                document.getElementById('syncStatus').innerText = "🟢 Database securely synced with cloud.";
+            } else {
+                ordersDatabase = []; 
+                document.getElementById('syncStatus').innerText = "🟡 Cloud empty. Creating a new data stream.";
+            }
+        } catch (error) {
+            console.error("Cloud Fetch Error:", error);
+            document.getElementById('syncStatus').innerText = "🔴 Cloud offline. Running in offline fallback mode.";
+        }
+        renderDatabaseView();
+    }
+
+    // Save data back up to your kvdb bucket
+    async function saveDatabaseToCloud() {
+        document.getElementById('syncStatus').innerText = "⏳ Syncing changes to global cloud server...";
+        try {
+            await fetch(CLOUD_API_URL, {
+                method: 'POST',
+                body: JSON.stringify(ordersDatabase),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            document.getElementById('syncStatus').innerText = "🟢 Global Cloud Sync Completed Successfully!";
+        } catch (error) {
+            alert("Database failed to upload to cloud. Check your connection!");
+        }
+        renderDatabaseView();
+    }
+
     function generateRandomTrackingID() {
         const prefix = "EM";
         const suffix = "IN";
@@ -316,19 +259,15 @@
         document.getElementById('genTrackingId').value = prefix + randomDigits + suffix;
     }
 
-    // Refreshes Table UI and active Select Dropdown menus across components
     function renderDatabaseView() {
         const tbody = document.getElementById('databaseTableBody');
         const selector = document.getElementById('activeIdSelector');
-        
-        // Cache selector index position
         const currentSelectedValue = selector.value;
 
         tbody.innerHTML = "";
         selector.innerHTML = '<option value="">-- Select Active ID --</option>';
 
         ordersDatabase.forEach((order, index) => {
-            // Append down into management rows
             let badgeClass = "badge-booked";
             if(order.stage === "In Transit" || order.stage === "Out for Delivery") badgeClass = "badge-transit";
             if(order.stage === "Delivered") badgeClass = "badge-delivered";
@@ -343,24 +282,19 @@
                     <td><button class="btn btn-danger" onclick="deleteOrderRecord(${index})">Delete</button></td>
                 </tr>
             `;
-
-            // Append item trace targets into dynamic dropdown selectors
             selector.innerHTML += `<option value="${order.id}">${order.id}</option>`;
         });
-
-        // Restore active position state mapping safely
         selector.value = currentSelectedValue;
     }
 
-    // Module 1 Controller Engine
-    function saveAndGenerateOrder() {
+    async function saveAndGenerateOrder() {
         const id = document.getElementById('genTrackingId').value;
         const type = document.getElementById('orderType').value;
         const origin = document.getElementById('originOffice').value || "Delhi GPO";
         const dest = document.getElementById('destOffice').value.trim();
 
         if(!dest) {
-            alert("Please provide an explicit destination terminal office location.");
+            alert("Please type a destination office!");
             return;
         }
 
@@ -371,24 +305,20 @@
             to: dest,
             stage: "Item Booked",
             location: origin,
-            remarks: "Manifest file generated successfully."
+            remarks: "Item Booked and processing on network."
         };
 
         ordersDatabase.push(newRecord);
-        alert(`Order ${id} registered successfully inside running memory.`);
+        await saveDatabaseToCloud(); 
         
-        // Reset state blocks
         document.getElementById('destOffice').value = "";
         document.getElementById('destPin').value = "";
         generateRandomTrackingID();
-        renderDatabaseView();
     }
 
-    // Dropdown auto filler logic
     function loadTargetOrderMetadata() {
         const selectedId = document.getElementById('activeIdSelector').value;
         const match = ordersDatabase.find(o => o.id === selectedId);
-        
         if(match) {
             document.getElementById('updateStage').value = match.stage;
             document.getElementById('updateLocation').value = match.location;
@@ -396,40 +326,39 @@
         }
     }
 
-    // Module 2 Controller Engine
-    function pushStatusUpdate() {
+    async function pushStatusUpdate() {
         const targetId = document.getElementById('activeIdSelector').value;
         if(!targetId) {
-            alert("Please pinpoint a registered target order row trace from drop menu index matrix first.");
+            alert("Please select an active Tracking ID from dropdown!");
             return;
         }
 
         const targetRecord = ordersDatabase.find(o => o.id === targetId);
         if(targetRecord) {
             targetRecord.stage = document.getElementById('updateStage').value;
-            targetRecord.location = document.getElementById('updateLocation').value || "Unknown Exchange Point";
+            targetRecord.location = document.getElementById('updateLocation').value || "Processing Facility";
             targetRecord.remarks = document.getElementById('updateRemarks').value;
             
-            alert(`Pushed routing status update to tracking stream data node map for package [${targetId}].`);
-            renderDatabaseView();
+            await saveDatabaseToCloud(); 
+            alert(`Status updated globally for ${targetId}!`);
         }
     }
 
-    // Row deletion hook
-    function deleteOrderRecord(index) {
-        if(confirm("Confirm removal of this order manifest log row permanently from runtime stack arrays?")) {
+    async function deleteOrderRecord(index) {
+        if(confirm("Delete this tracking ID completely from global cloud database?")) {
             ordersDatabase.splice(index, 1);
-            renderDatabaseView();
+            await saveDatabaseToCloud();
         }
     }
 
-    // Core lookup simulation interface (Used to link step-1 logic with dashboard results)
-    function trackConsignmentPublic() {
+    async function trackConsignmentPublic() {
+        await fetchDatabaseFromCloud();
+
         const inputId = document.getElementById('publicSearchInput').value.trim();
         const outputView = document.getElementById('trackingResultDisplay');
 
         if(!inputId) {
-            alert("Please type a designated Tracking index string value.");
+            alert("Please enter a Tracking ID.");
             return;
         }
 
@@ -438,15 +367,15 @@
         if(match) {
             outputView.style.display = "block";
             outputView.innerHTML = `
-                <p style="color: var(--success-green); margin-top:0;"><strong>✔ System Match Found!</strong></p>
-                <strong>Route Matrix:</strong> ${match.from} ➔ ${match.to}<br>
-                <strong>Current Stage Flag:</strong> ${match.stage}<br>
-                <strong>Last Facility Scanned:</strong> ${match.location}<br>
-                <strong>Remarks Log:</strong> <em>${match.remarks || "No supplementary descriptions logged."}</em>
+                <p style="color: var(--success-green); margin-top:0;"><strong>✔ Tracking Data Loaded from Cloud Database</strong></p>
+                <strong>Route:</strong> ${match.from} ➔ ${match.to}<br>
+                <strong>Current Status:</strong> ${match.stage}<br>
+                <strong>Last Location Facility:</strong> ${match.location}<br>
+                <strong>Remarks:</strong> <em>${match.remarks || "No explicit logs written."}</em>
             `;
         } else {
             outputView.style.display = "none";
-            alert("Tracking ID not found in database! Please add it from the Admin Panel below.");
+            alert("Tracking ID not found in global database! Double check your input value.");
         }
     }
 </script>
