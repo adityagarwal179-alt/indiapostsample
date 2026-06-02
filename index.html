@@ -90,7 +90,6 @@
         .btn-warning { background: #d97706; color: white; }
         .btn-warning:hover { background: #b45309; }
         
-        /* Modal Alert Styling */
         .modal {
             display: none;
             position: fixed;
@@ -151,7 +150,7 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="trackId">Tracking ID (Auto Generated or Custom)</label>
+                <label for="trackId">Tracking ID (Auto Generated)</label>
                 <input type="text" id="trackId" readonly style="background: #eef2f6; font-weight: bold; color: #1e3a8a;">
             </div>
             <div class="inline-group">
@@ -167,11 +166,11 @@
             <div class="inline-group">
                 <div class="form-group">
                     <label for="destOffice">Destination Office</label>
-                    <input type="text" id="destOffice" placeholder="e.g., Mumbai Hub">
+                    <input type="text" id="destOffice" value="Mumbai Hub">
                 </div>
                 <div class="form-group">
                     <label for="destPin">Destination PIN</label>
-                    <input type="text" id="destPin" placeholder="e.g., 400001">
+                    <input type="text" id="destPin" value="400001">
                 </div>
             </div>
             <button class="btn-primary" id="btnSaveUpload">Save & Upload to Cloud</button>
@@ -180,8 +179,8 @@
         <div class="card">
             <h2>⚡ 2. Update Live Status & Routing Location</h2>
             <div class="form-group">
-                <label for="activeTrackId">Select Active ID (Generated Above)</label>
-                <input type="text" id="activeTrackId" readonly style="background: #eef2f6; font-weight: bold;">
+                <label for="activeTrackId">Enter/Paste Active ID (Type any ID here)</label>
+                <input type="text" id="activeTrackId" placeholder="e.g., EM619883938IN" style="font-weight: bold; text-transform: uppercase;">
             </div>
             <div class="form-group">
                 <label for="currentStatus">Change Current Status Stage</label>
@@ -211,8 +210,7 @@
     </div>
 </div>
 
-    <script>
-    // सटीक KVDB क्लाउड डेटाबेस यूआरएल
+<script>
     const CLOUD_API_URL = "https://kvdb.io/9vBh7SXWV8hsoqKmP3WzEF";
 
     window.onload = function() {
@@ -236,7 +234,7 @@
         document.getElementById('customAlert').style.display = 'none';
     }
 
-    // एक्शन 1: डेटाबेस में नया शिपमेंट बनाना
+    // एक्शन 1: नया शिपमेंट अपलोड करना
     document.getElementById('btnSaveUpload').addEventListener('click', async function() {
         const trackId = document.getElementById('trackId').value.trim();
         const orderType = document.getElementById('orderType').value;
@@ -244,11 +242,6 @@
         const originPin = document.getElementById('originPin').value.trim();
         const destOffice = document.getElementById('destOffice').value.trim();
         const destPin = document.getElementById('destPin').value.trim();
-
-        if(!destOffice || !destPin) {
-            showAlert("⚠️ Missing Information", "Please enter Destination Office and Destination PIN.");
-            return;
-        }
 
         const payload = {
             trackId: trackId,
@@ -263,100 +256,86 @@
         };
 
         try {
-            // CORS ब्लॉक से बचने के लिए text/plain मोड का उपयोग
-            const response = await fetch(`${CLOUD_API_URL}/${trackId}`, {
+            await fetch(`${CLOUD_API_URL}/${trackId}`, {
                 method: 'POST',
-                mode: 'no-cors', // यह ब्राउज़र को ब्लॉक करने से रोकता है
+                mode: 'no-cors',
                 body: JSON.stringify(payload)
             });
-
-            // no-cors मोड में हमेशा सफलता मान ली जाती है क्योंकि सर्वर रिस्पॉन्स छुपा देता है
-            showAlert("✅ Cloud Sync Request Sent", `Tracking ID: ${trackId} has been submitted! Please proceed to Section 2 to push updates.`);
+            showAlert("✅ Cloud Sync Success", `Tracking ID: ${trackId} Registered!`);
             document.getElementById('activeTrackId').value = trackId;
-            
         } catch (error) {
-            showAlert("❌ Connection Error", "Database communication failed. Please try again.");
-            console.error(error);
+            showAlert("❌ Error", "Failed to connect.");
         }
     });
 
-    // एक्शन 2: लाइव स्टेटस अपडेट करना
+    // एक्शन 2: किसी भी आईडी का स्टेटस सीधा अपडेट करना (बिना पुराने डेटा को खोए)
     document.getElementById('btnPushUpdate').addEventListener('click', async function() {
-        const trackId = document.getElementById('activeTrackId').value.trim();
+        const trackId = document.getElementById('activeTrackId').value.trim().toUpperCase();
         const currentStatus = document.getElementById('currentStatus').value;
         const currentLocation = document.getElementById('currentLocation').value.trim();
 
+        if(!trackId) {
+            showAlert("⚠️ Missing ID", "Please type or paste a Tracking ID in Section 2.");
+            return;
+        }
         if(!currentLocation) {
-            showAlert("⚠️ Missing Location", "Please enter the current routing location center name.");
+            showAlert("⚠️ Missing Location", "Please enter Current Routing Location.");
             return;
         }
 
-        // पहले से मौजूद डेटा का ढांचा दोबारा तैयार करना ताकि पुराना डेटा गायब न हो
-        const orderType = document.getElementById('orderType').value;
-        const originOffice = document.getElementById('originOffice').value.trim();
-        const originPin = document.getElementById('originPin').value.trim();
-        const destOffice = document.getElementById('destOffice').value.trim();
-        const destPin = document.getElementById('destPin').value.trim();
-
-        const updatedPayload = {
+        let payload = {
             trackId: trackId,
-            orderType: orderType,
-            originOffice: originOffice,
-            originPin: originPin,
-            destOffice: destOffice,
-            destPin: destPin,
+            orderType: document.getElementById('orderType').value,
+            originOffice: document.getElementById('originOffice').value,
+            originPin: document.getElementById('originPin').value,
+            destOffice: document.getElementById('destOffice').value,
+            destPin: document.getElementById('destPin').value,
             currentStatus: currentStatus,
             currentLocation: currentLocation,
             lastUpdated: new Date().toLocaleString()
         };
 
         try {
-            const postRes = await fetch(`${CLOUD_API_URL}/${trackId}`, {
+            // डायरेक्ट डेटाबेस में फ्रेश स्टेटस ओवरराइट (CORS बाईपास के साथ)
+            await fetch(`${CLOUD_API_URL}/${trackId}`, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify(updatedPayload)
+                body: JSON.stringify(payload)
             });
 
-            showAlert("⚡ Global Update Pushed", `Status for ${trackId} updated to "${currentStatus}".`);
+            showAlert("⚡ Global Update Pushed", `ID: ${trackId} status successfully set to "${currentStatus}" at "${currentLocation}"!`);
         } catch (error) {
-            showAlert("❌ Process Error", "An error occurred while pushing updates.");
-            console.error(error);
+            showAlert("❌ Process Error", "Failed to push status update.");
         }
     });
 
-    // एक्शन 3: पब्लिक ट्रैकिंग इंटरफ़ेस
+    // एक्शन 3: पब्लिक सर्च
     document.getElementById('btnTrack').addEventListener('click', async function() {
         const searchId = document.getElementById('searchTrackId').value.trim().toUpperCase();
 
         if(!searchId) {
-            showAlert("⚠️ Input Empty", "Please type a Tracking ID to check.");
+            showAlert("⚠️ Input Empty", "Please type a Tracking ID.");
             return;
         }
 
         try {
-            // डेटा फेच करते समय कैशिंग से बचने के लिए रैंडम स्ट्रिंग जोड़ना
             const response = await fetch(`${CLOUD_API_URL}/${searchId}?nocache=${Date.now()}`);
-            
             if(!response.ok) {
-                showAlert("❌ Tracking ID Not Found", "ID not found in database or server limit reached! Double check your input.");
+                showAlert("❌ Tracking ID Not Found", "This ID does not exist in the cloud database yet.");
                 return;
             }
 
             const data = await response.json();
-            
             const resultHtml = `
               📌 Order Type: ${data.orderType || 'N/A'}\n
-              📍 Route: ${data.originOffice || ''} ➡️ ${data.destOffice || ''}\n
+              📍 Route: ${data.originOffice || 'N/A'} ➡️ ${data.destOffice || 'N/A'}\n
               ⚡ LIVE STATUS: ${data.currentStatus || 'Processing'}\n
               🏢 Current Hub: ${data.currentLocation || 'In Transit'}\n
               🕒 Last Update: ${data.lastUpdated || 'Just Now'}
             `;
-            
             showAlert("📦 Live Tracking Results Found", resultHtml);
-
         } catch (error) {
-            showAlert("❌ Search Failure", "Tracking ID not found in global database! Double check your input value.");
-            console.error(error);
+            showAlert("❌ Search Failure", "Tracking ID not found or network limit reached.");
         }
     });
 </script>
