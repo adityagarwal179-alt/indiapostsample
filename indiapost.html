@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Tracking System with Admin Panel</title>
+    <style>
+        :root {
+            --primary-color: #990000;
+            --secondary-color: #333;
+            --success-color: #28a745;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --admin-color: #0056b3;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: var(--secondary-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        /* Forms & Panels */
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: fit-content;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            margin-top: 0;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .captcha-box {
+            background: #e9ecef;
+            padding: 8px 15px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 3px;
+            text-decoration: line-through;
+            border-radius: 4px;
+        }
+
+        .btn {
+            width: 100%;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-search { background-color: var(--primary-color); }
+        .btn-search:hover { background-color: #770000; }
+        .btn-admin { background-color: var(--admin-color); }
+        .btn-admin:hover { background-color: #004085; }
+
+        /* Tracking Results */
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .id-display { font-size: 18px; font-weight: bold; color: var(--primary-color); }
+
+        /* Progress Bar */
+        .progress-track {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+
+        .progress-track::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 30px;
+            right: 30px;
+            height: 4px;
+            background-color: #e0e0e0;
+            z-index: 1;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 15px;
+            left: 30px;
+            height: 4px;
+            background-color: var(--success-color);
+            z-index: 1;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .step { text-align: center; position: relative; z-index: 2; flex: 1; }
+        .step .bullet {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .step.active .bullet { background-color: var(--success-color); }
+        .step .step-text { font-size: 11px; font-weight: bold; color: #666; }
+        .step.active .step-text { color: black; }
+
+        /* Details & Tables */
+        .details-table, .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .details-table td, .admin-table th, .admin-table td {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+        }
+        .details-table .label { background-color: var(--light-bg); font-weight: bold; width: 25%; }
+
+        .routing-section h3 { border-bottom: 2px solid var(--primary-color); padding-bottom: 5px; color: var(--primary-color); }
+        .routing-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .routing-table th { background-color: var(--light-bg); text-align: left; padding: 10px; border-bottom: 2px solid var(--border-color); }
+        .routing-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); }
+
+        /* Admin Section Styling */
+        .admin-section {
+            max-width: 1200px;
+            margin: 40px auto 0 auto;
+            border-top: 4px dashed var(--admin-color);
+            padding-top: 30px;
+        }
+        .admin-panel-title { color: var(--admin-color); border-bottom: 2px solid var(--admin-color); margin-top: 0;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white;}
+        .badge-booked { background-color: #6c757d; }
+        .badge-dispatched { background-color: #17a2b8; }
+        .badge-transit { background-color: #ffc107; color: black; }
+        .badge-out { background-color: #fd7e14; }
+        .badge-delivered { background-color: var(--success-color); }
+    </style>
+</head>
+<body>
+
+<!-- USER INTERFACE -->
+<div class="container">
+    
+    <!-- USER SEARCH PANEL -->
+    <div class="panel">
+        <h2 class="panel-title">Track Consignment</h2>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('consignment')">Consignment ID</div>
+            <div class="tab" onclick="switchTab('moneyorder')">Money Order</div>
+        </div>
+        
+        <div class="form-group">
+            <label id="input-label">ENTER CONSIGNMENT NUMBER</label>
+            <input type="text" id="tracking-id" placeholder="e.g. EM123456789IN">
+        </div>
+
+        <div class="form-group">
+            <label>CAPTCHA</label>
+            <div class="captcha-container">
+                <div class="captcha-box" id="captcha-code">W9XmH</div>
+                <input type="text" id="captcha-input" placeholder="Enter captcha" style="width: 100%;">
+            </div>
+        </div>
+
+        <button class="btn btn-search" onclick="trackConsignment()">Search & Track</button>
+    </div>
+
+    <!-- TRACKING RESULTS PANEL -->
+    <div class="panel" id="result-panel" style="display: none;">
+        <div class="result-header">
+            <div class="id-display"><span id="res-type">Consignment</span> No: <span id="res-id">-</span></div>
+            <button onclick="window.print()" style="padding: 5px 10px; cursor: pointer;">Print Report</button>
+        </div>
+
+        <!-- Progress Status Bar -->
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-fill-line"></div>
+            <div class="step" id="step-1"><div class="bullet">1</div><div class="step-text">Booked</div></div>
+            <div class="step" id="step-2"><div class="bullet">2</div><div class="step-text">Dispatched</div></div>
+            <div class="step" id="step-3"><div class="bullet">3</div><div class="step-text">In Transit</div></div>
+            <div class="step" id="step-4"><div class="bullet">4</div><div class="step-text">Out for Delivery</div></div>
+            <div class="step" id="step-5"><div class="bullet">5</div><div class="step-text">Delivered</div></div>
+        </div>
+
+        <!-- Summary Details Table -->
+        <table class="details-table">
+            <tr>
+                <td class="label">Article Number:</td>
+                <td id="tbl-art-num" style="font-weight: bold;">-</td>
+                <td class="label">Article Type:</td>
+                <td id="tbl-art-type">-</td>
+            </tr>
+            <tr>
+                <td class="label">Booked At:</td>
+                <td id="tbl-booked-at">-</td>
+                <td class="label">Booked On:</td>
+                <td id="tbl-booked-on">-</td>
+            </tr>
+            <tr>
+                <td class="label">Origin Pin:</td>
+                <td id="tbl-origin-pin">-</td>
+                <td class="label">Destination:</td>
+                <td id="tbl-dest">-</td>
+            </tr>
+            <tr>
+                <td class="label">Current Status:</td>
+                <td id="tbl-status" style="font-weight: bold; color: var(--primary-color);">-</td>
+                <td class="label">Destination Pin:</td>
+                <td id="tbl-dest-pin">-</td>
+            </tr>
+        </table>
+
+        <!-- Detailed Routing Steps -->
+        <div class="routing-section">
+            <h3>Routing History</h3>
+            <table class="routing-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Office Location</th>
+                        <th>Event Status</th>
+                    </tr>
+                </thead>
+                <tbody id="routing-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!-- ADMINISTRATIVE SECTION -->
+<div class="admin-section">
+    <div class="panel" style="border: 2px solid var(--admin-color);">
+        <h2 class="panel-title admin-panel-title">⚙️ Central Admin Dashboard (Manage Orders)</h2>
+        
+        <div class="grid-2">
+            <!-- Box 1: Create New ID -->
+            <div style="border-right: 1px solid #dee2e6; padding-right: 15px;">
+                <h4>1. Create / Generate Tracking ID</h4>
+                <div class="form-group">
+                    <label>Order Type</label>
+                    <select id="adm-type" onchange="autoGenerateAdminId()">
+                        <option value="Consignment">Consignment</option>
+                        <option value="Money Order">Money Order</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tracking ID (Auto Generated or Custom)</label>
+                    <input type="text" id="adm-id" style="font-weight: bold; color: var(--admin-color);">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Origin Office</label>
+                        <input type="text" id="adm-origin" value="Delhi GPO">
+                    </div>
+                    <div class="form-group">
+                        <label>Origin PIN</label>
+                        <input type="text" id="adm-opin" value="110001">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Destination Office</label>
+                        <input type="text" id="adm-dest" value="Mumbai HO">
+                    </div>
+                    <div class="form-group">
+                        <label>Destination PIN</label>
+                        <input type="text" id="adm-dpin" value="400001">
+                    </div>
+                </div>
+                <button class="btn btn-admin" onclick="createNewOrder()">Save & Generate Order</button>
+            </div>
+
+            <!-- Box 2: Update Existing ID Status -->
+            <div style="padding-left: 15px;">
+                <h4>2. Update Live Status & Routing Location</h4>
+                <div class="form-group">
+                    <label>Select Active ID</label>
+                    <select id="adm-update-id" onchange="loadSelectedOrderData()">
+                        <option value="">-- Select Active ID --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Change Current Status Stage</label>
+                    <select id="adm-update-status">
+                        <option value="1">Stage 1: Item Booked</option>
+                        <option value="2">Stage 2: Item Dispatched</option>
+                        <option value="3">Stage 3: In Transit</option>
+                        <option value="4">Stage 4: Out for Delivery</option>
+                        <option value="5">Stage 5: Item Delivered</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Current Action Location Office</label>
+                    <input type="text" id="adm-update-location" placeholder="e.g. Surat Sorting Hub">
+                </div>
+                <div class="form-group">
+                    <label>Custom Remarks / Status Message</label>
+                    <input type="text" id="adm-update-remark" placeholder="e.g. Received at Hub / Out for delivery by Postman">
+                </div>
+                <button class="btn btn-admin" style="background-color: #28a745;" onclick="updateOrderStatus()">Push Status Update</button>
+            </div>
+        </div>
+
+        <!-- Admin Table Database View -->
+        <h4 style="margin-top: 30px;">Active Orders Database In System</h4>
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr style="background:#f1f1f1;">
+                        <th>Type</th>
+                        <th>Tracking ID</th>
+                        <th>From -> To</th>
+                        <th>Current Stage</th>
+                        <th>Last Update Location</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-db-tbody">
+                    <!-- DB Rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentTab = 'consignment';
+    
+    // Database Initialization (Using Browser LocalStorage)
+    let db = JSON.parse(localStorage.getItem('track_db')) || {};
+
+    // Standard Mock Data setup if Database is completely empty first time
+    if(Object.keys(db).length === 0) {
+        db = {
+            "EM775323452IN": {
+                type: "Consignment",
+                id: "EM775323452IN",
+                origin: "Delhi GPO", originPin: "110001",
+                dest: "Mumbai HO", destPin: "400001",
+                stage: 3,
+                artType: "SP INLAND DOCUMENT",
+                history: [
+                    { time: "01/06/2026 14:20", loc: "Ahmedabad Hub", remark: "In Transit - Dispatched from Hub" },
+                    { time: "31/05/2026 09:15", loc: "Delhi Sorting Hub", remark: "Item Dispatched" },
+                    { time: "30/05/2026 11:00", loc: "Delhi GPO", remark: "Item Booked" }
+                ]
+            },
+            "MO445129834IN": {
+                type: "Money Order",
+                id: "MO445129834IN",
+                origin: "Kolkata GPO", originPin: "700001",
+                dest: "Patna HO", destPin: "800001",
+                stage: 5,
+                artType: "DOMESTIC MONEY ORDER",
+                history: [
+                    { time: "02/06/2026 12:30", loc: "Patna HO", remark: "Item Successfully Delivered / Paid" },
+                    { time: "02/06/2026 08:00", loc: "Patna HO", remark: "Out for Delivery" },
+                    { time: "01/06/2026 10:00", loc: "Kolkata GPO", remark: "Money Order Booked" }
+                ]
+            }
+        };
+        saveDB();
+    }
+
+    function saveDB() {
+        localStorage.setItem('track_db', JSON.stringify(db));
+    }
+
+    // Generate Random ID for Admin Panel Box
+    function autoGenerateAdminId() {
+        const type = document.getElementById('adm-type').value;
+        const prefix = type === 'Consignment' ? 'EM' : 'MO';
+        const randomNum = Math.floor(100000000 + Math.random() * 900000000);
+        document.getElementById('adm-id').value = `${prefix}${randomNum}IN`;
+    }
+
+    // Captcha Generator
+    function generateCaptcha() {
+        const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let captcha = "";
+        for (let i = 0; i < 5; i++) captcha += chars[Math.floor(Math.random() * chars.length)];
+        document.getElementById('captcha-code').innerText = captcha;
+        document.getElementById('captcha-input').value = "";
+    }
+
+    // Tab Switcher
+    function switchTab(tabName) {
+        currentTab = tabName;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('input-label').innerText = tabName === 'consignment' ? "ENTER CONSIGNMENT NUMBER" : "ENTER MONEY ORDER NUMBER";
+        generateCaptcha();
+    }
+
+    // User Panel: Main Tracking Logic
+    function trackConsignment() {
+        const inputId = document.getElementById('tracking-id').value.trim().toUpperCase();
+        const captchaInput = document.getElementById('captcha-input').value.trim();
+        const actualCaptcha = document.getElementById('captcha-code').innerText;
+
+        if(!inputId) { alert("Please enter Tracking ID!"); return; }
+        if(captchaInput.toLowerCase() !== actualCaptcha.toLowerCase()) {
+            alert("Incorrect Captcha!");
+            generateCaptcha();
+            return;
+        }
+
+        // Search in local database
+        const order = db[inputId];
+
+        if(!order) {
+            alert("Tracking ID not found in database! Please add it from the Admin Panel below.");
+            generateCaptcha();
+            return;
+        }
+
+        // Show Results Layout
+        document.getElementById('result-panel').style.display = 'block';
+        document.getElementById('res-id').innerText = order.id;
+        document.getElementById('res-type').innerText = order.type;
+        
+        // Fill Summary Table
+        document.getElementById('tbl-art-num').innerText = order.id;
+        document.getElementById('tbl-art-type').innerText = order.artType || "STANDARD RECORD";
+        document.getElementById('tbl-booked-at').innerText = order.origin;
+        document.getElementById('tbl-origin-pin').innerText = order.originPin;
+        document.getElementById('tbl-dest').innerText = order.dest;
+        document.getElementById('tbl-dest-pin').innerText = order.destPin;
+        
+        // Handle Current Status Title Text
+        const stageNames = ["Unbooked", "Item Booked", "Dispatched", "In Transit", "Out for Delivery", "Delivered"];
+        document.getElementById('tbl-status').innerText = stageNames[order.stage];
+        if(order.stage === 5) document.getElementById('tbl-status').style.color = 'var(--success-color)';
+        else document.getElementById('tbl-status').style.color = 'var(--primary-color)';
+
+        // Fill Booked On Date
+        const totalHistory = order.history.length;
+        document.getElementById('tbl-booked-on').innerText = totalHistory > 0 ? order.history[totalHistory - 1].time : 'N/A';
+
+        // Update Graphical Progress Steps 
+        const fillPercentage = ((order.stage - 1) / 4) * 100;
+        document.getElementById('progress-fill-line').style.width = `${fillPercentage}%`;
+
+        for(let i = 1; i <= 5; i++) {
+            const stepEl = document.getElementById(`step-${i}`);
+            if(i <= order.stage) stepEl.classList.add('active');
+            else stepEl.classList.remove('active');
+        }
+
+        // Build History Timeline Table
+        let hHtml = "";
+        order.history.forEach(item => {
+            hHtml += `<tr>
+                <td>${item.time}</td>
+                <td>${item.loc}</td>
+                <td><strong>${item.remark}</strong></td>
+            </tr>`;
+        });
+        document.getElementById('routing-tbody').innerHTML = hHtml;
+        generateCaptcha();
+    }
+
+    // ==========================================
+    // ADMIN PANEL BUSINESS LOGIC
+    // ==========================================
+    
+    // Refresh Admin drop-downs and Table database UI
+    function renderAdminDashboard() {
+        const selectUpdate = document.getElementById('adm-update-id');
+        const dbTbody = document.getElementById('admin-db-tbody');
+        
+        // Clear old items
+        selectUpdate.innerHTML = '<option value="">-- Select Active ID --</option>';
+        dbTbody.innerHTML = "";
+
+        const stageBadges = [
+            "",
+            "<span class='badge badge-booked'>Booked</span>",
+            "<span class='badge badge-dispatched'>Dispatched</span>",
+            "<span class='badge badge-transit'>In Transit</span>",
+            "<span class='badge badge-out'>Out for Delivery</span>",
+            "<span class='badge badge-delivered'>Delivered</span>"
+        ];
+
+        Object.keys(db).forEach(id => {
+            const item = db[id];
+            
+            // Append to dropdown selection list
+            let opt = document.createElement('option');
+            opt.value = item.id;
+            opt.innerText = `${item.id} (${item.type})`;
+            selectUpdate.appendChild(opt);
+
+            // Append to admin table list view
+            const lastLocation = item.history.length > 0 ? item.history[0].loc : 'N/A';
+            dbTbody.innerHTML += `<tr>
+                <td>${item.type}</td>
+                <td style="font-weight:bold; color:var(--admin-color);">${item.id}</td>
+                <td>${item.origin} ➔ ${item.dest}</td>
+                <td>${stageBadges[item.stage]}</td>
+                <td>${lastLocation}</td>
+                <td><button onclick="deleteOrder('${item.id}')" style="background:red; color:white; border:none; border-radius:3px; cursor:pointer;">Delete</button></td>
+            </tr>`;
+        });
+    }
+
+    // Create / Generate New Record
+    function createNewOrder() {
+        const type = document.getElementById('adm-type').value;
+        const id = document.getElementById('adm-id').value.trim().toUpperCase();
+        const origin = document.getElementById('adm-origin').value.trim();
+        const originPin = document.getElementById('adm-opin').value.trim();
+        const dest = document.getElementById('adm-dest').value.trim();
+        const destPin = document.getElementById('adm-dpin').value.trim();
+
+        if(!id) { alert("ID value required!"); return; }
+
+        const currentTime = new Date().toLocaleString('en-GB', { hour12: false }).replace(',', '');
+
+        // Initialize structured object
+        db[id] = {
+            type: type,
+            id: id,
+            origin: origin,
+            originPin: originPin,
+            dest: dest,
+            destPin: destPin,
+            stage: 1,
+            artType: type === 'Consignment' ? 'SP INLAND DOCUMENT' : 'DOMESTIC VALUE PAYABLE',
+            history: [
+                { time: currentTime, loc: origin, remark: "Item Booked & Registered Successfully" }
+            ]
+        };
+
+        saveDB();
+        renderAdminDashboard();
+        autoGenerateAdminId();
+        alert(`Success: Order ${id} has been created active inside database.`);
+    }
+
+    // Dynamic dropdown change load fields
+    function loadSelectedOrderData() {
+        const id = document.getElementById('adm-update-id').value;
+        if(!id) return;
+        const order = db[id];
+        document.getElementById('adm-update-status').value = order.stage;
+        document.getElementById('adm-update-location').value = order.history[0] ? order.history[0].loc : order.origin;
+    }
+
+    // Push new status state inside tracking history array
+    function updateOrderStatus() {
+        const id = document.getElementById('adm-update-id').value;
+        const newStage = parseInt(document.getElementById('adm-update-status').value);
+        const loc = document.getElementById('adm-update-location').value.trim() || "Sorting Center";
+        const remark = document.getElementById('adm-update-remark').value.trim() || "Status Processed";
+
+        if(!id) { alert("Please select an ID to update first!"); return; }
+
+        const currentTime = new Date().toLocaleString('en-GB', { hour12: false }).replace(',', '');
+
+        // Prepend new updates on top array position index 0
+        db[id].stage = newStage;
+        db[id].history.unshift({
+            time: currentTime,
+            loc: loc,
+            remark: remark
+        });
+
+        saveDB();
+        renderAdminDashboard();
+        alert(`Status updated successfully for ${id}. Try tracking it from User search box now!`);
+    }
+
+    // Delete Item
+    function deleteOrder(id) {
+        if(confirm(`Are you sure you want to delete ${id}?`)) {
+            delete db[id];
+            saveDB();
+            renderAdminDashboard();
+        }
+    }
+
+    // Startup initialization triggers
+    window.onload = function() {
+        generateCaptcha();
+        autoGenerateAdminId();
+        renderAdminDashboard();
+    };
+</script>
+
+</body>
+</html>
