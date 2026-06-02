@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Tracking System with Admin Panel</title>
+    <title>Advanced Tracking System with Cloud Sync</title>
     <style>
         :root {
             --primary-color: #990000;
@@ -218,14 +218,19 @@
         .badge-transit { background-color: #ffc107; color: black; }
         .badge-out { background-color: #fd7e14; }
         .badge-delivered { background-color: var(--success-color); }
+        
+        .loading-text {
+            color: #888;
+            font-style: italic;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    
     <div class="panel">
-        <h2 class="panel-title">Track Consignment</h2>
+        <h2 class="panel-title">Track Consignment <span id="sync-status" class="loading-text">(Connecting Cloud...)</span></h2>
         <div class="tabs">
             <div class="tab active" id="tab-consignment" onclick="switchTab('consignment')">Consignment ID</div>
             <div class="tab" id="tab-moneyorder" onclick="switchTab('moneyorder')">Money Order</div>
@@ -306,7 +311,6 @@
     </div>
 </div>
 
-
 <div class="admin-section">
     <div class="panel" style="border: 2px solid var(--admin-color);">
         <h2 class="panel-title admin-panel-title">⚙️ Central Admin Dashboard (Manage Orders)</h2>
@@ -345,7 +349,7 @@
                         <input type="text" id="adm-dpin" value="400001">
                     </div>
                 </div>
-                <button class="btn btn-admin" onclick="createNewOrder()">Save & Generate Order</button>
+                <button class="btn btn-admin" id="btn-create" onclick="createNewOrder()">Save & Generate Order</button>
             </div>
 
             <div style="padding-left: 15px;">
@@ -374,7 +378,7 @@
                     <label>Custom Remarks / Status Message</label>
                     <input type="text" id="adm-update-remark" placeholder="e.g. Received at Hub / Out for delivery by Postman">
                 </div>
-                <button class="btn btn-admin" style="background-color: #28a745;" onclick="updateOrderStatus()">Push Status Update</button>
+                <button class="btn btn-admin" id="btn-update" style="background-color: #28a745;" onclick="updateOrderStatus()">Push Status Update</button>
             </div>
         </div>
 
@@ -400,43 +404,44 @@
 
 <script>
     let currentTab = 'consignment';
-    let db = JSON.parse(localStorage.getItem('track_db')) || {};
+    let db = {};
+    
+    // Public free storage pipeline link (Multi-device access capability)
+    const binURL = "https://kvbin.org/v1/tracking_system_db_live";
 
-    // Standard Mock Data Setup
-    if(Object.keys(db).length === 0) {
-        db = {
-            "EM775323452IN": {
-                type: "Consignment",
-                id: "EM775323452IN",
-                origin: "Delhi GPO", originPin: "110001",
-                dest: "Mumbai HO", destPin: "400001",
-                stage: 3,
-                artType: "SP INLAND DOCUMENT",
-                history: [
-                    { time: "01/06/2026 14:20", loc: "Ahmedabad Hub", remark: "In Transit - Dispatched from Hub" },
-                    { time: "31/05/2026 09:15", loc: "Delhi Sorting Hub", remark: "Item Dispatched" },
-                    { time: "30/05/2026 11:00", loc: "Delhi GPO", remark: "Item Booked" }
-                ]
-            },
-            "MO445129834IN": {
-                type: "Money Order",
-                id: "MO445129834IN",
-                origin: "Kolkata GPO", originPin: "700001",
-                dest: "Patna HO", destPin: "800001",
-                stage: 5,
-                artType: "DOMESTIC MONEY ORDER",
-                history: [
-                    { time: "02/06/2026 12:30", loc: "Patna HO", remark: "Item Successfully Delivered / Paid" },
-                    { time: "02/06/2026 08:00", loc: "Patna HO", remark: "Out for Delivery" },
-                    { time: "01/06/2026 10:00", loc: "Kolkata GPO", remark: "Money Order Booked" }
-                ]
+    // Cloud Database Load Function
+    async function loadDB() {
+        document.getElementById('sync-status').innerText = "(Syncing...)";
+        try {
+            let response = await fetch(binURL);
+            if (response.ok) {
+                let data = await response.json();
+                db = data || {};
+            } else {
+                db = JSON.parse(localStorage.getItem('track_db')) || {};
             }
-        };
-        saveDB();
+            document.getElementById('sync-status').innerText = "● Live Cloud Sync Active";
+            document.getElementById('sync-status').style.color = "green";
+        } catch (e) {
+            db = JSON.parse(localStorage.getItem('track_db')) || {};
+            document.getElementById('sync-status').innerText = "● Local Mode (Offline)";
+            document.getElementById('sync-status').style.color = "orange";
+        }
+        renderAdminDashboard();
     }
 
-    function saveDB() {
+    // Cloud Database Save Function
+    async function saveDB() {
         localStorage.setItem('track_db', JSON.stringify(db));
+        try {
+            await fetch(binURL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(db)
+            });
+        } catch (e) {
+            console.log("Cloud backup pending reconnection.");
+        }
     }
 
     function autoGenerateAdminId() {
@@ -524,6 +529,7 @@
         const selectUpdate = document.getElementById('adm-update-id');
         const dbTbody = document.getElementById('admin-db-tbody');
         
+        const currentSelection = selectUpdate.value;
         selectUpdate.innerHTML = '<option value="">-- Select Active ID --</option>';
         dbTbody.innerHTML = "";
 
@@ -554,9 +560,13 @@
                 <td><button onclick="deleteOrder('${item.id}')" style="background:red; color:white; border:none; border-radius:3px; cursor:pointer; padding: 3px 8px;">Delete</button></td>
             </tr>`;
         });
+        
+        if (db[currentSelection]) {
+            selectUpdate.value = currentSelection;
+        }
     }
 
-    function createNewOrder() {
+    async function createNewOrder() {
         const type = document.getElementById('adm-type').value;
         const id = document.getElementById('adm-id').value.trim().toUpperCase();
         const origin = document.getElementById('adm-origin').value.trim();
@@ -565,6 +575,9 @@
         const destPin = document.getElementById('adm-dpin').value.trim();
 
         if(!id) { alert("ID value required!"); return; }
+        
+        document.getElementById('btn-create').innerText = "Saving to Cloud...";
+        document.getElementById('btn-create').disabled = true;
 
         const currentTime = new Date().toLocaleString('en-GB', { hour12: false }).replace(',', '');
 
@@ -582,9 +595,12 @@
             ]
         };
 
-        saveDB();
-        renderAdminDashboard();
+        await saveDB();
+        await loadDB();
         autoGenerateAdminId();
+        
+        document.getElementById('btn-create').innerText = "Save & Generate Order";
+        document.getElementById('btn-create').disabled = false;
         alert(`Success: Order ${id} has been created active inside database.`);
     }
 
@@ -596,13 +612,16 @@
         document.getElementById('adm-update-location').value = order.history[0] ? order.history[0].loc : order.origin;
     }
 
-    function updateOrderStatus() {
+    async function updateOrderStatus() {
         const id = document.getElementById('adm-update-id').value;
         const newStage = parseInt(document.getElementById('adm-update-status').value);
         const loc = document.getElementById('adm-update-location').value.trim() || "Sorting Center";
         const remark = document.getElementById('adm-update-remark').value.trim() || "Status Processed";
 
         if(!id) { alert("Please select an ID to update first!"); return; }
+
+        document.getElementById('btn-update').innerText = "Syncing Cloud...";
+        document.getElementById('btn-update').disabled = true;
 
         const currentTime = new Date().toLocaleString('en-GB', { hour12: false }).replace(',', '');
 
@@ -613,23 +632,29 @@
             remark: remark
         });
 
-        saveDB();
-        renderAdminDashboard();
+        await saveDB();
+        await loadDB();
+        
+        document.getElementById('btn-update').innerText = "Push Status Update";
+        document.getElementById('btn-update').disabled = false;
         alert(`Status updated successfully for ${id}.`);
     }
 
-    function deleteOrder(id) {
+    async function deleteOrder(id) {
         if(confirm(`Are you sure you want to delete ${id}?`)) {
             delete db[id];
-            saveDB();
-            renderAdminDashboard();
+            await saveDB();
+            await loadDB();
         }
     }
 
     window.onload = function() {
         generateCaptcha();
         autoGenerateAdminId();
-        renderAdminDashboard();
+        loadDB();
+        
+        // Auto refresh database every 15 seconds to sync data between devices automatically
+        setInterval(loadDB, 15000);
     };
 </script>
 
