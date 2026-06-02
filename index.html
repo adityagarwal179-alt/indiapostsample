@@ -107,6 +107,7 @@
             letter-spacing: 3px;
             text-decoration: line-through;
             border-radius: 4px;
+            user-select: none;
         }
 
         .btn {
@@ -221,15 +222,13 @@
 </head>
 <body>
 
-<!-- USER INTERFACE -->
 <div class="container">
     
-    <!-- USER SEARCH PANEL -->
     <div class="panel">
         <h2 class="panel-title">Track Consignment</h2>
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('consignment')">Consignment ID</div>
-            <div class="tab" onclick="switchTab('moneyorder')">Money Order</div>
+            <div class="tab active" id="tab-consignment" onclick="switchTab('consignment')">Consignment ID</div>
+            <div class="tab" id="tab-moneyorder" onclick="switchTab('moneyorder')">Money Order</div>
         </div>
         
         <div class="form-group">
@@ -248,14 +247,12 @@
         <button class="btn btn-search" onclick="trackConsignment()">Search & Track</button>
     </div>
 
-    <!-- TRACKING RESULTS PANEL -->
     <div class="panel" id="result-panel" style="display: none;">
         <div class="result-header">
             <div class="id-display"><span id="res-type">Consignment</span> No: <span id="res-id">-</span></div>
             <button onclick="window.print()" style="padding: 5px 10px; cursor: pointer;">Print Report</button>
         </div>
 
-        <!-- Progress Status Bar -->
         <div class="progress-track">
             <div class="progress-fill" id="progress-fill-line"></div>
             <div class="step" id="step-1"><div class="bullet">1</div><div class="step-text">Booked</div></div>
@@ -265,7 +262,6 @@
             <div class="step" id="step-5"><div class="bullet">5</div><div class="step-text">Delivered</div></div>
         </div>
 
-        <!-- Summary Details Table -->
         <table class="details-table">
             <tr>
                 <td class="label">Article Number:</td>
@@ -293,7 +289,6 @@
             </tr>
         </table>
 
-        <!-- Detailed Routing Steps -->
         <div class="routing-section">
             <h3>Routing History</h3>
             <table class="routing-table">
@@ -312,13 +307,11 @@
 </div>
 
 
-<!-- ADMINISTRATIVE SECTION -->
 <div class="admin-section">
     <div class="panel" style="border: 2px solid var(--admin-color);">
         <h2 class="panel-title admin-panel-title">⚙️ Central Admin Dashboard (Manage Orders)</h2>
         
         <div class="grid-2">
-            <!-- Box 1: Create New ID -->
             <div style="border-right: 1px solid #dee2e6; padding-right: 15px;">
                 <h4>1. Create / Generate Tracking ID</h4>
                 <div class="form-group">
@@ -355,7 +348,6 @@
                 <button class="btn btn-admin" onclick="createNewOrder()">Save & Generate Order</button>
             </div>
 
-            <!-- Box 2: Update Existing ID Status -->
             <div style="padding-left: 15px;">
                 <h4>2. Update Live Status & Routing Location</h4>
                 <div class="form-group">
@@ -386,7 +378,6 @@
             </div>
         </div>
 
-        <!-- Admin Table Database View -->
         <h4 style="margin-top: 30px;">Active Orders Database In System</h4>
         <div style="overflow-x: auto;">
             <table class="admin-table">
@@ -401,7 +392,6 @@
                     </tr>
                 </thead>
                 <tbody id="admin-db-tbody">
-                    <!-- DB Rows -->
                 </tbody>
             </table>
         </div>
@@ -410,11 +400,9 @@
 
 <script>
     let currentTab = 'consignment';
-    
-    // Database Initialization (Using Browser LocalStorage)
     let db = JSON.parse(localStorage.getItem('track_db')) || {};
 
-    // Standard Mock Data setup if Database is completely empty first time
+    // Standard Mock Data Setup
     if(Object.keys(db).length === 0) {
         db = {
             "EM775323452IN": {
@@ -451,7 +439,6 @@
         localStorage.setItem('track_db', JSON.stringify(db));
     }
 
-    // Generate Random ID for Admin Panel Box
     function autoGenerateAdminId() {
         const type = document.getElementById('adm-type').value;
         const prefix = type === 'Consignment' ? 'EM' : 'MO';
@@ -459,7 +446,6 @@
         document.getElementById('adm-id').value = `${prefix}${randomNum}IN`;
     }
 
-    // Captcha Generator
     function generateCaptcha() {
         const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let captcha = "";
@@ -468,16 +454,14 @@
         document.getElementById('captcha-input').value = "";
     }
 
-    // Tab Switcher
     function switchTab(tabName) {
         currentTab = tabName;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
+        document.getElementById(`tab-${tabName}`).classList.add('active');
         document.getElementById('input-label').innerText = tabName === 'consignment' ? "ENTER CONSIGNMENT NUMBER" : "ENTER MONEY ORDER NUMBER";
         generateCaptcha();
     }
 
-    // User Panel: Main Tracking Logic
     function trackConsignment() {
         const inputId = document.getElementById('tracking-id').value.trim().toUpperCase();
         const captchaInput = document.getElementById('captcha-input').value.trim();
@@ -490,21 +474,17 @@
             return;
         }
 
-        // Search in local database
         const order = db[inputId];
-
         if(!order) {
             alert("Tracking ID not found in database! Please add it from the Admin Panel below.");
             generateCaptcha();
             return;
         }
 
-        // Show Results Layout
         document.getElementById('result-panel').style.display = 'block';
         document.getElementById('res-id').innerText = order.id;
         document.getElementById('res-type').innerText = order.type;
         
-        // Fill Summary Table
         document.getElementById('tbl-art-num').innerText = order.id;
         document.getElementById('tbl-art-type').innerText = order.artType || "STANDARD RECORD";
         document.getElementById('tbl-booked-at').innerText = order.origin;
@@ -512,17 +492,13 @@
         document.getElementById('tbl-dest').innerText = order.dest;
         document.getElementById('tbl-dest-pin').innerText = order.destPin;
         
-        // Handle Current Status Title Text
         const stageNames = ["Unbooked", "Item Booked", "Dispatched", "In Transit", "Out for Delivery", "Delivered"];
         document.getElementById('tbl-status').innerText = stageNames[order.stage];
-        if(order.stage === 5) document.getElementById('tbl-status').style.color = 'var(--success-color)';
-        else document.getElementById('tbl-status').style.color = 'var(--primary-color)';
+        document.getElementById('tbl-status').style.color = order.stage === 5 ? 'var(--success-color)' : 'var(--primary-color)';
 
-        // Fill Booked On Date
         const totalHistory = order.history.length;
         document.getElementById('tbl-booked-on').innerText = totalHistory > 0 ? order.history[totalHistory - 1].time : 'N/A';
 
-        // Update Graphical Progress Steps 
         const fillPercentage = ((order.stage - 1) / 4) * 100;
         document.getElementById('progress-fill-line').style.width = `${fillPercentage}%`;
 
@@ -532,7 +508,6 @@
             else stepEl.classList.remove('active');
         }
 
-        // Build History Timeline Table
         let hHtml = "";
         order.history.forEach(item => {
             hHtml += `<tr>
@@ -545,16 +520,10 @@
         generateCaptcha();
     }
 
-    // ==========================================
-    // ADMIN PANEL BUSINESS LOGIC
-    // ==========================================
-    
-    // Refresh Admin drop-downs and Table database UI
     function renderAdminDashboard() {
         const selectUpdate = document.getElementById('adm-update-id');
         const dbTbody = document.getElementById('admin-db-tbody');
         
-        // Clear old items
         selectUpdate.innerHTML = '<option value="">-- Select Active ID --</option>';
         dbTbody.innerHTML = "";
 
@@ -570,13 +539,11 @@
         Object.keys(db).forEach(id => {
             const item = db[id];
             
-            // Append to dropdown selection list
             let opt = document.createElement('option');
             opt.value = item.id;
             opt.innerText = `${item.id} (${item.type})`;
             selectUpdate.appendChild(opt);
 
-            // Append to admin table list view
             const lastLocation = item.history.length > 0 ? item.history[0].loc : 'N/A';
             dbTbody.innerHTML += `<tr>
                 <td>${item.type}</td>
@@ -584,12 +551,11 @@
                 <td>${item.origin} ➔ ${item.dest}</td>
                 <td>${stageBadges[item.stage]}</td>
                 <td>${lastLocation}</td>
-                <td><button onclick="deleteOrder('${item.id}')" style="background:red; color:white; border:none; border-radius:3px; cursor:pointer;">Delete</button></td>
+                <td><button onclick="deleteOrder('${item.id}')" style="background:red; color:white; border:none; border-radius:3px; cursor:pointer; padding: 3px 8px;">Delete</button></td>
             </tr>`;
         });
     }
 
-    // Create / Generate New Record
     function createNewOrder() {
         const type = document.getElementById('adm-type').value;
         const id = document.getElementById('adm-id').value.trim().toUpperCase();
@@ -602,7 +568,6 @@
 
         const currentTime = new Date().toLocaleString('en-GB', { hour12: false }).replace(',', '');
 
-        // Initialize structured object
         db[id] = {
             type: type,
             id: id,
@@ -623,7 +588,6 @@
         alert(`Success: Order ${id} has been created active inside database.`);
     }
 
-    // Dynamic dropdown change load fields
     function loadSelectedOrderData() {
         const id = document.getElementById('adm-update-id').value;
         if(!id) return;
@@ -632,7 +596,6 @@
         document.getElementById('adm-update-location').value = order.history[0] ? order.history[0].loc : order.origin;
     }
 
-    // Push new status state inside tracking history array
     function updateOrderStatus() {
         const id = document.getElementById('adm-update-id').value;
         const newStage = parseInt(document.getElementById('adm-update-status').value);
@@ -643,7 +606,6 @@
 
         const currentTime = new Date().toLocaleString('en-GB', { hour12: false }).replace(',', '');
 
-        // Prepend new updates on top array position index 0
         db[id].stage = newStage;
         db[id].history.unshift({
             time: currentTime,
@@ -653,10 +615,9 @@
 
         saveDB();
         renderAdminDashboard();
-        alert(`Status updated successfully for ${id}. Try tracking it from User search box now!`);
+        alert(`Status updated successfully for ${id}.`);
     }
 
-    // Delete Item
     function deleteOrder(id) {
         if(confirm(`Are you sure you want to delete ${id}?`)) {
             delete db[id];
@@ -665,7 +626,6 @@
         }
     }
 
-    // Startup initialization triggers
     window.onload = function() {
         generateCaptcha();
         autoGenerateAdminId();
